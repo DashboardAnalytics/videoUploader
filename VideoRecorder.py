@@ -80,3 +80,5 @@ def init():
         print ("Recording video Nº "+str(nVideo)+"...")
         r = videoRecorder(nVideo, dt_string, nFrames)
         nVideo += 1
+
+init()

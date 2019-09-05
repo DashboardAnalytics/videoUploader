@@ -1,7 +1,8 @@
 from datetime import datetime
 import numpy as np
-import cv2, os, glob, time
-    
+#import cv2, os, glob, time
+import ConfigLoader as cfgLoader
+
 url='http://192.168.1.107:8081/video.mjpg'
 
 # Funcion que obtiene una grabacion desde una url, y
@@ -59,10 +60,10 @@ def init():
         os.mkdir('./records/'+dt_string)
     # Si ya existe, es probable que ya existan videos, por lo que
     # se obtiene el nombre del ultimo video creado para continuar con
-    # la serie 
+    # la serie
     else:
         directory = './records/'+dt_string+"/*"
-        listOfFiles = glob.glob(directory) 
+        listOfFiles = glob.glob(directory)
         # Se comprueba que existan archivos adentro de la carpeta
         if(len(listOfFiles) != 0):
             latestFile = max(listOfFiles, key=os.path.getctime)
@@ -76,7 +77,6 @@ def init():
     # se llama a la funcion videoRecorder
     r = True
     while ((nVideo<=n) and (r)):
-        print ("Recording video Nº "+str(nVideo)+"...")    
+        print ("Recording video Nº "+str(nVideo)+"...")
         r = videoRecorder(nVideo, dt_string, nFrames)
         nVideo += 1
-init()

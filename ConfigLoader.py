@@ -13,7 +13,9 @@ def getListOfCameras():
 
     config = configparser.ConfigParser()
     config.read('configuration.ini')
-
-    cameraList = config['CAMERAS']['CameraUrlList'].split(',')
-
-    return cameraList
+    if('CAMERAS' in config):
+        if('CameraUrlList' in config['CAMERAS']):
+            cameraList = config['CAMERAS']['CameraUrlList'].split(',')
+            return cameraList
+        return []
+    return []

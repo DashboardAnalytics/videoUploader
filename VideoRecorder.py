@@ -1,6 +1,6 @@
-from datetime import datetime
+import datetime
 import numpy as np
-#import cv2, os, glob, time
+import os, glob, time
 import ConfigLoader as cfgLoader
 
 url='http://192.168.1.107:8081/video.mjpg'
@@ -10,16 +10,20 @@ configFile = cfgLoader.getINIConfiguration()
 # Entradas: Int con numero de video actual, string con fecha actual e int con cantidad de frames por segundo
 # Salidas: Boolean indicando si el proceso se llevo a cabo correctamente
 def videoRecorder(nVideo, today):
-    # Se obtiene nuevamente la fecha, solo que ademas con la hora actual
+    #Se crean las variables necesarias para procesar cada video.
     nFrames = int(configFile['VIDEO']['VideoFrameRate'])
     maxLength = int(configFile['VIDEO']['MaxVideoLength'])
     localShop = configFile['SHOPPING']['Shop']
     shopping = configFile['SHOPPING']['ShoppingCenter']
-    now = datetime.now()
-    dt_string = now.strftime("%d-%m-%Y %H-%M-%S")
+    # Se obtiene nuevamente la fecha, solo que ademas con la hora actual
+    now = datetime.datetime.now()
+    videoDate = now.strftime("%d-%m-%Y")
+    startTime = now.strftime("%H-%M-%S")
+    endTime = (now + datetime.timedelta(0, maxLength)).strftime("%H-%M-%S")
     # Se genera el nombre del archivo de salida
     recordDirectory = './' + configFile['VIDEO']['Directory'] + '/'+today+"/"
-    filename = recordDirectory + 'n' + str(nVideo) + '_' + shopping + '_' + localShop + '_' + dt_string + '.avi'
+    filename = 'n' + str(nVideo) + '_' + shopping + '_' + localShop + '_' + videoDate + '_' + startTime + '_' + endTime + '.avi'
+    saveDirectory = recordDirectory + filename
     # Se comienza a capturar el streaming del video
     cap = cv2.VideoCapture(url)
     if not cap:
@@ -29,7 +33,7 @@ def videoRecorder(nVideo, today):
     # Se define el codec y se crea el objeto de tipo VideoWriter
     frame_width = int(cap.get(3))
     frame_height = int(cap.get(4))
-    out = cv2.VideoWriter(filename,cv2.VideoWriter_fourcc('M','J','P','G'), nFrames, (frame_width,frame_height))
+    out = cv2.VideoWriter(saveDirectory,cv2.VideoWriter_fourcc('M','J','P','G'), nFrames, (frame_width,frame_height))
 
     aux2 = 0
     aux = 0
@@ -53,14 +57,16 @@ def videoRecorder(nVideo, today):
 
 def startRecording():
     # Se obtiene fecha actual para generar la carpeta correspondiente
-    today = datetime.now()
+    today = datetime.datetime.now()
     dt_string = today.strftime("%d-%m-%Y")
     # Se setean los parametros iniciales
     nVideo = 1
     n = int(input("Cantidad de partes: "))
     # Si la carpeta no existe, se crea
-    if(not os.path.isdir()):
-        os.mkdir('./' + configFile['VIDEO']['Directory'] + '/' +dt_string)
+    if(not os.path.isdir('./' + configFile['VIDEO']['Directory'])):
+        os.mkdir('./' + configFile['VIDEO']['Directory'])
+        if(not os.path.isdir('./' + configFile['VIDEO']['Directory'] + '/' +dt_string)):
+            os.mkdir('./' + configFile['VIDEO']['Directory'] + '/' +dt_string)
     # Si ya existe, es probable que ya existan videos, por lo que
     # se obtiene el nombre del ultimo video creado para continuar con
     # la serie
@@ -84,4 +90,4 @@ def startRecording():
         r = videoRecorder(nVideo, dt_string)
         nVideo += 1
 
-init()
+startRecording()

@@ -4,18 +4,22 @@ import numpy as np
 import ConfigLoader as cfgLoader
 
 url='http://192.168.1.107:8081/video.mjpg'
-
+configFile = cfgLoader.getINIConfiguration()
 # Funcion que obtiene una grabacion desde una url, y
 # escribe el archivo de salida en formato .avi
 # Entradas: Int con numero de video actual, string con fecha actual e int con cantidad de frames por segundo
 # Salidas: Boolean indicando si el proceso se llevo a cabo correctamente
-def videoRecorder(nVideo, today, nFrames):
+def videoRecorder(nVideo, today):
     # Se obtiene nuevamente la fecha, solo que ademas con la hora actual
+    nFrames = int(configFile['VIDEO']['VideoFrameRate'])
+    maxLength = int(configFile['VIDEO']['MaxVideoLength'])
+    localShop = configFile['SHOPPING']['Shop']
+    shopping = configFile['SHOPPING']['ShoppingCenter']
     now = datetime.now()
     dt_string = now.strftime("%d-%m-%Y %H-%M-%S")
     # Se genera el nombre del archivo de salida
-    recordDirectory = './records/'+today+"/"
-    filename = recordDirectory+"stream "+dt_string+" n"+str(nVideo)+" fr"+str(5)+".avi"
+    recordDirectory = './' + configFile['VIDEO']['Directory'] + '/'+today+"/"
+    filename = recordDirectory + 'n' + str(nVideo) + '_' + shopping + '_' + localShop + '_' + dt_string + '.avi'
     # Se comienza a capturar el streaming del video
     cap = cv2.VideoCapture(url)
     if not cap:
@@ -29,7 +33,7 @@ def videoRecorder(nVideo, today, nFrames):
 
     aux2 = 0
     aux = 0
-    while aux < 300:
+    while aux < maxLength:
         # Se lee frame a frame
         ret, frame = cap.read()
         # Si se produce un error al leer el frame, se detiene el proceso
@@ -47,22 +51,21 @@ def videoRecorder(nVideo, today, nFrames):
     return True
 
 
-def init():
+def startRecording():
     # Se obtiene fecha actual para generar la carpeta correspondiente
     today = datetime.now()
     dt_string = today.strftime("%d-%m-%Y")
     # Se setean los parametros iniciales
     nVideo = 1
     n = int(input("Cantidad de partes: "))
-    nFrames = 5
     # Si la carpeta no existe, se crea
-    if(not os.path.isdir('./records/'+dt_string)):
-        os.mkdir('./records/'+dt_string)
+    if(not os.path.isdir()):
+        os.mkdir('./' + configFile['VIDEO']['Directory'] + '/' +dt_string)
     # Si ya existe, es probable que ya existan videos, por lo que
     # se obtiene el nombre del ultimo video creado para continuar con
     # la serie
     else:
-        directory = './records/'+dt_string+"/*"
+        directory = './' + configFile['VIDEO']['Directory'] + '/' +dt_string + "/*"
         listOfFiles = glob.glob(directory)
         # Se comprueba que existan archivos adentro de la carpeta
         if(len(listOfFiles) != 0):
@@ -78,7 +81,7 @@ def init():
     r = True
     while ((nVideo<=n) and (r)):
         print ("Recording video Nº "+str(nVideo)+"...")
-        r = videoRecorder(nVideo, dt_string, nFrames)
+        r = videoRecorder(nVideo, dt_string)
         nVideo += 1
 
 init()

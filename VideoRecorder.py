@@ -2,14 +2,14 @@ import datetime
 import numpy as np
 import os, glob, time
 import ConfigLoader as cfgLoader
+import cv2
 
-url='http://192.168.1.107:8081/video.mjpg'
 configFile = cfgLoader.getINIConfiguration()
 # Funcion que obtiene una grabacion desde una url, y
 # escribe el archivo de salida en formato .avi
 # Entradas: Int con numero de video actual, string con fecha actual e int con cantidad de frames por segundo
 # Salidas: Boolean indicando si el proceso se llevo a cabo correctamente
-def videoRecorder(nVideo, today):
+def videoRecorder(nVideo, today, url):
     #Se crean las variables necesarias para procesar cada video.
     nFrames = int(configFile['VIDEO']['VideoFrameRate'])
     maxLength = int(configFile['VIDEO']['MaxVideoLength'])
@@ -22,7 +22,7 @@ def videoRecorder(nVideo, today):
     endTime = (now + datetime.timedelta(0, maxLength)).strftime("%H-%M-%S")
     # Se genera el nombre del archivo de salida
     recordDirectory = './' + configFile['VIDEO']['Directory'] + '/'+today+"/"
-    filename = 'n' + str(nVideo) + '_' + shopping + '_' + localShop + '_' + videoDate + '_' + startTime + '_' + endTime + '.avi'
+    filename = str(nVideo) + '_' + shopping + '_' + localShop + '_' + videoDate + '_' + startTime + '_' + endTime + '.avi'
     saveDirectory = recordDirectory + filename
     # Se comienza a capturar el streaming del video
     cap = cv2.VideoCapture(url)
@@ -37,6 +37,7 @@ def videoRecorder(nVideo, today):
 
     aux2 = 0
     aux = 0
+    print(maxLength)
     while aux < maxLength:
         # Se lee frame a frame
         ret, frame = cap.read()
@@ -55,7 +56,7 @@ def videoRecorder(nVideo, today):
     return True
 
 
-def startRecording():
+def startRecording(url):
     # Se obtiene fecha actual para generar la carpeta correspondiente
     today = datetime.datetime.now()
     dt_string = today.strftime("%d-%m-%Y")
@@ -78,7 +79,7 @@ def startRecording():
             latestFile = max(listOfFiles, key=os.path.getctime)
             # Se busca el caracter n, donde en la posicion siguiente
             # se tiene el numero del video
-            nVideo = int(latestFile[latestFile.find('n')+1]) + 1
+            nVideo = int(latestFile.split('\\')[-1].split('_')[0])+1
             # Se modifica n para que corresponda con la cantidad
             # de partes que se desea grabar
             n = n + nVideo - 1
@@ -86,8 +87,14 @@ def startRecording():
     # se llama a la funcion videoRecorder
     r = True
     while ((nVideo<=n) and (r)):
-        print ("Recording video Nº "+str(nVideo)+"...")
-        r = videoRecorder(nVideo, dt_string)
+        print ("Recording video NÂº "+str(nVideo)+"...")
+        r = videoRecorder(nVideo, dt_string, url)
         nVideo += 1
 
-startRecording()
+
+def main():
+    cameraUrls = cfgLoader.getListOfCameras()
+    print(cameraUrls)
+    for url in cameraUrls:
+        startRecording(url)
+main()

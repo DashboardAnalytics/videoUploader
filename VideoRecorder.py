@@ -3,6 +3,7 @@ import numpy as np
 import os, glob, time
 import ConfigLoader as cfgLoader
 import cv2
+import APIConsumer as api
 
 configFile = cfgLoader.getINIConfiguration()
 # Funcion que obtiene una grabacion desde una url, y
@@ -33,6 +34,9 @@ def videoRecorder(nVideo, today, url):
     # Se define el codec y se crea el objeto de tipo VideoWriter
     frame_width = int(cap.get(3))
     frame_height = int(cap.get(4))
+    # Se comunica a la API que se grabará un video.
+    api.createVideoData({'videoName': filename, 'status': 1, 'videoNumber': nVideo, 'store': localShop, 'ShoppingCenter': shopping})
+    # Se empieza a grabar el video.
     out = cv2.VideoWriter(saveDirectory,cv2.VideoWriter_fourcc('M','J','P','G'), nFrames, (frame_width,frame_height))
 
     aux2 = 0

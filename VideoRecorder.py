@@ -37,8 +37,7 @@ def videoRecorder(nVideo, today, url):
 
     aux2 = 0
     aux = 0
-    print(maxLength)
-    while aux < maxLength:
+    while aux < (maxLength*nFrames):
         # Se lee frame a frame
         ret, frame = cap.read()
         # Si se produce un error al leer el frame, se detiene el proceso
@@ -46,7 +45,7 @@ def videoRecorder(nVideo, today, url):
             print("!!! Couldn't read frame!")
             return False
         # Se escribe el frame en el archivo de salida
-        if(aux2 % 5 == 0):
+        if(aux2 % nFrames == 0):
             out.write(frame)
             aux += 1
         aux2 += 1
@@ -87,7 +86,7 @@ def startRecording(url):
     # se llama a la funcion videoRecorder
     r = True
     while ((nVideo<=n) and (r)):
-        print ("Recording video NÂº "+str(nVideo)+"...")
+        print ("Recording video Nº "+str(nVideo)+"...")
         r = videoRecorder(nVideo, dt_string, url)
         nVideo += 1
 

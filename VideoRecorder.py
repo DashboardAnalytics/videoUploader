@@ -57,7 +57,8 @@ def videoRecorder(nVideo, today, url):
     # Se liberan los recursos de captura y de escritura
     cap.release()
     out.release()
-
+    #Se crea video en la DB.
+    api.createVideoData(filename, nVideo, localShop, shopping)
     #Se inicia subida de video.
     cloudStorage.upload_blob('my-new-videos-prueba2211-bucket-test', saveDirectory, filename)
     return True

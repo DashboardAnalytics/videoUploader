@@ -4,6 +4,7 @@ import os, glob, time
 import ConfigLoader as cfgLoader
 import cv2
 import APIConsumer as api
+import CloudStorageFunctions as cloudStorage
 
 configFile = cfgLoader.getINIConfiguration()
 # Funcion que obtiene una grabacion desde una url, y
@@ -56,6 +57,9 @@ def videoRecorder(nVideo, today, url):
     # Se liberan los recursos de captura y de escritura
     cap.release()
     out.release()
+
+    #Se inicia subida de video.
+    cloudStorage.upload_blob('my-new-videos-prueba2211-bucket-test', saveDirectory, filename)
     return True
 
 

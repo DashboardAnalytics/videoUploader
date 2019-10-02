@@ -36,7 +36,7 @@ def videoRecorder(nVideo, today, url):
     frame_width = int(cap.get(3))
     frame_height = int(cap.get(4))
     # Se comunica a la API que se grabará un video.
-    api.createVideoData({'videoName': filename, 'status': 1, 'videoNumber': nVideo, 'store': localShop, 'ShoppingCenter': shopping})
+    #api.createVideoData({'videoName': filename, 'status': 1, 'videoNumber': nVideo, 'store': localShop, 'ShoppingCenter': shopping})
     # Se empieza a grabar el video.
     out = cv2.VideoWriter(saveDirectory,cv2.VideoWriter_fourcc('M','J','P','G'), nFrames, (frame_width,frame_height))
 
@@ -73,7 +73,8 @@ def startRecording(url):
     # Si la carpeta no existe, se crea
     if(not os.path.isdir('./' + configFile['VIDEO']['Directory'])):
         os.mkdir('./' + configFile['VIDEO']['Directory'])
-        if(not os.path.isdir('./' + configFile['VIDEO']['Directory'] + '/' +dt_string)):
+        os.mkdir('./' + configFile['VIDEO']['Directory'] + '/' +dt_string)
+    if(not os.path.isdir('./' + configFile['VIDEO']['Directory'] + '/' +dt_string)):
             os.mkdir('./' + configFile['VIDEO']['Directory'] + '/' +dt_string)
     # Si ya existe, es probable que ya existan videos, por lo que
     # se obtiene el nombre del ultimo video creado para continuar con

@@ -4,7 +4,7 @@ from google.cloud import storage
 def create_storage_bucket(bucket_name):
     # Instantiates a client
     storage_client = storage.Client.from_service_account_json(
-            'keys/googlekeys.json')
+            'GCSCredentials.json')
 
     # The name for the new bucket
     bucket_name = bucket_name
@@ -20,7 +20,7 @@ def explicit():
     # Explicitly use service account credentials by specifying the private key
     # file.
     storage_client = storage.Client.from_service_account_json(
-        'keys/googlekeys.json')
+        'GCSCredentials.json')
 
     # Make an authenticated API request
     buckets = list(storage_client.list_buckets())
@@ -32,7 +32,7 @@ def explicit():
 def upload_blob(bucket_name, source_file_name, destination_blob_name):
     """Uploads a file to the bucket."""
     storage_client = storage.Client.from_service_account_json(
-            'keys/googlekeys.json')
+            'GCSCredentials.json')
     bucket = storage_client.get_bucket(bucket_name)
     blob = bucket.blob(destination_blob_name)
 

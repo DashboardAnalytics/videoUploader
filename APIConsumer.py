@@ -16,21 +16,22 @@ def createVideoData(filename, videoNumber, store, shoppingCenter):
 
 def getVideoDataByName(videoName):
 
-    response = requests.get(baseUrl + 'getVideoName', data = {'videoName': videoName})
+    response = requests.get(baseUrl + 'getVideoName', json = {'videoName': videoName})
     data = response.json()
 
     return data
 
-def updateVideoStatus(videoName, status):
-    
-    response = requests.post(baseUrl + 'updateStatus', data = {'videoName': videoName, 'status': status})
-    data = response.json()
+def updateVideoStatusReady(id, filename, videoNumber, store, shoppingCenter):
 
+    videoData = {"video_name": filename, "status": 2, "video_number": videoNumber, "store": store, "shopping_center": shoppingCenter}
+    response = requests.post(baseUrl + id, json = videoData)
+
+    data = response.json()
     return data
 
 def eraseVideoFromDB(videoName):
 
-    response = requests.post(baseUrl + 'eraseAll', data = {'apiKey': apikey})
+    response = requests.post(baseUrl + 'eraseAll', json = {'apiKey': apikey})
 
     data = response.json()
 

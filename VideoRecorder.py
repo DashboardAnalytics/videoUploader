@@ -9,14 +9,16 @@ import manageFiles as fileManager
 import threading
 configFile = cfgLoader.getINIConfiguration()
 
-def videoUploader(saveDirectory, filename):
+def videoUploader(saveDirectory, videoData, videoResponse):
     try:
-        cloudStorage.upload_blob('my-new-videos-prueba2211-bucket-test', saveDirectory, filename)
+        cloudStorage.upload_blob('my-new-videos-prueba2211-bucket-test', saveDirectory, videoData['filename'])
     except:
         print("Contacte con el admin F")
     else:
         print("Borrando video...")
-        fileManager.eraseFileInFolder(filename)
+        fileManager.eraseFileInFolder(videoData['filename'])
+        print("actualizando data.")
+        api.updateVideoStatusReady(videoResponse['id'], videoData['filename'], videoData['videoNumber'], videoData['store'], videoData['shoppingCenter'])
 
 # Funcion que obtiene una grabacion desde una url, y
 # escribe el archivo de salida en formato .avi
@@ -67,11 +69,11 @@ def videoRecorder(nVideo, today, url):
     cap.release()
     out.release()
     #Se crea video en la DB.
-    api.createVideoData(filename, nVideo, localShop, shopping)
+    dataVideo = {"filename": filename, "videoNumber" : nVideo, "store": localShop, "shoppingCenter": shopping}
+    videoResponse = api.createVideoData(filename, nVideo, localShop, shopping)
     #Se inicia subida de video.
-    t = threading.Thread(target = videoUploader, args = (saveDirectory,filename)) 
+    t = threading.Thread(target = videoUploader, args = (saveDirectory, dataVideo, videoResponse))
     t.start()
-    
     return True
 
 

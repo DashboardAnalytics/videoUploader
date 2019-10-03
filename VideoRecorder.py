@@ -5,8 +5,19 @@ import ConfigLoader as cfgLoader
 import cv2
 import APIConsumer as api
 import CloudStorageFunctions as cloudStorage
-
+import manageFiles as fileManager
+import threading
 configFile = cfgLoader.getINIConfiguration()
+
+def videoUploader(saveDirectory, filename):
+    try:
+        cloudStorage.upload_blob('my-new-videos-prueba2211-bucket-test', saveDirectory, filename)
+    except:
+        print("Contacte con el admin F")
+    else:
+        print("Borrando video...")
+        fileManager.eraseFileInFolder(filename)
+
 # Funcion que obtiene una grabacion desde una url, y
 # escribe el archivo de salida en formato .avi
 # Entradas: Int con numero de video actual, string con fecha actual e int con cantidad de frames por segundo
@@ -35,8 +46,6 @@ def videoRecorder(nVideo, today, url):
     # Se define el codec y se crea el objeto de tipo VideoWriter
     frame_width = int(cap.get(3))
     frame_height = int(cap.get(4))
-    # Se comunica a la API que se grabará un video.
-    #api.createVideoData({'videoName': filename, 'status': 1, 'videoNumber': nVideo, 'store': localShop, 'ShoppingCenter': shopping})
     # Se empieza a grabar el video.
     out = cv2.VideoWriter(saveDirectory,cv2.VideoWriter_fourcc('M','J','P','G'), nFrames, (frame_width,frame_height))
 
@@ -60,7 +69,9 @@ def videoRecorder(nVideo, today, url):
     #Se crea video en la DB.
     api.createVideoData(filename, nVideo, localShop, shopping)
     #Se inicia subida de video.
-    cloudStorage.upload_blob('my-new-videos-prueba2211-bucket-test', saveDirectory, filename)
+    t = threading.Thread(target = videoUploader, args = (saveDirectory,filename)) 
+    t.start()
+    
     return True
 
 

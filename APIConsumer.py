@@ -9,7 +9,7 @@ apikey = 'C020D7AD82F2F7F1476A8E95D95A39AA34E714EB8277539AF0D8011E1E8CB18D850B5D
 def createVideoData(filename, videoNumber, store, shoppingCenter):
 
     videoData = {"video_name": filename, "status": 1, "video_number": videoNumber, "store": store, "shopping_center": shoppingCenter}
-    response = requests.post(baseUrl, data = videoData)
+    response = requests.post(baseUrl, json = videoData)
 
     data = response.json()
     return data
@@ -22,7 +22,7 @@ def getVideoDataByName(videoName):
     return data
 
 def updateVideoStatus(videoName, status):
-
+    
     response = requests.post(baseUrl + 'updateStatus', data = {'videoName': videoName, 'status': status})
     data = response.json()
 

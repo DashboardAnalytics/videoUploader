@@ -1,6 +1,7 @@
 import os
 import ConfigLoader as cfgLoader
 import pandas as pd
+import datetime
 
 def checkFileInFolder(filename, folder):
 
@@ -15,12 +16,12 @@ def checkFileInFolder(filename, folder):
 
 def eraseFileInFolder(filename):
 
-    today = datetime.now()
+    today = datetime.datetime.now()
     dt_string = today.strftime("%d-%m-%Y")
     directory = './' + cfgLoader.getINIConfiguration()['VIDEO']['Directory'] + '/' + dt_string
 
     if(checkFileInFolder(filename, directory)):
-        os.remove(directoty + '/' + filename)
+        os.remove(directory + '/' + filename)
         return True
     else:
         return False

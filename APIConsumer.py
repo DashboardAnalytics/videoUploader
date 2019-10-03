@@ -25,13 +25,10 @@ def updateVideoStatusReady(videoId, filename, videoNumber, store, shoppingCenter
 
     videoData = {"video_name": filename, "status": 2, "video_number": videoNumber, "store": store, "shopping_center": shoppingCenter}
     response = requests.put(baseUrl + str(videoId), json = videoData)
-    
-        #data = response.json()
-    #return data
 
-def eraseVideoFromDB(videoName):
+def eraseVideosFromDB(videoName):
 
-    response = requests.post(baseUrl + 'eraseAll', json = {'apiKey': apikey})
+    response = requests.post(baseUrl + 'eraseAll')
 
     data = response.json()
 

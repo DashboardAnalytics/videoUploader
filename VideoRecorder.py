@@ -7,6 +7,7 @@ import APIConsumer as api
 import CloudStorageFunctions as cloudStorage
 import manageFiles as fileManager
 import threading
+import scheduler as sched
 configFile = cfgLoader.getINIConfiguration()
 
 def videoUploader(saveDirectory, videoData, videoResponse):
@@ -16,11 +17,10 @@ def videoUploader(saveDirectory, videoData, videoResponse):
         print("Error de conexion al subir el video,",videoData['videoNumber'])
         print("Contacte con el admin F")
     else:
-        print("Borrando video...")
-        fileManager.eraseFileInFolder(videoData['filename'])
         print("actualizando data.")
         api.updateVideoStatusReady(videoResponse['id'], videoData['filename'], videoData['videoNumber'], videoData['store'], videoData['shoppingCenter'])
-
+        print("Borrando video...")
+        fileManager.eraseFileInFolder(videoData['filename'])
 # Funcion que obtiene una grabacion desde una url, y
 # escribe el archivo de salida en formato .avi
 # Entradas: Int con numero de video actual, string con fecha actual e int con cantidad de frames por segundo
@@ -109,15 +109,26 @@ def startRecording(url):
     # Mientras no existan problemas al grabar y queden partes por grabar,
     # se llama a la funcion videoRecorder
     r = True
-    while ((nVideo<=n) and (r)):
+    runningStatus = sched.getRunningStatus()
+    while ( (runningStatus) and (r) ):
         print ("Recording video Nº "+str(nVideo)+"...")
         r = videoRecorder(nVideo, dt_string, url)
+        runningStatus = sched.getRunningStatus()
         nVideo += 1
 
+def recordCameras():
+    cameraUrls = cfgLoader.getListOfCameras()
+    threads = []
+    for camera in cameraUrls:
+        thread = threading.Thread(target = startRecording, args = (camera))
+        threads.append(thread)
+        thread.start()
 
 def main():
-    cameraUrls = cfgLoader.getListOfCameras()
-    print(cameraUrls)
-    for url in cameraUrls:
-        startRecording(url)
+
+    sched.startCameraRecording(recordCameras, configFile['VIDEO']['startTime'], configFile['VIDEO']['endTime'])
+    while 1:
+        sched.run_pending()
+        time.sleep(1)
+
 main()

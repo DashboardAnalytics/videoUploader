@@ -13,6 +13,7 @@ def videoUploader(saveDirectory, videoData, videoResponse):
     try:
         cloudStorage.upload_blob('my-new-videos-prueba2211-bucket-test', saveDirectory, videoData['filename'])
     except:
+        print("Error de conexion al subir el video,",videoData['videoNumber'])
         print("Contacte con el admin F")
     else:
         print("Borrando video...")

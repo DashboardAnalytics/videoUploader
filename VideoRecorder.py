@@ -84,7 +84,6 @@ def startRecording(url):
     dt_string = today.strftime("%d-%m-%Y")
     # Se setean los parametros iniciales
     nVideo = 1
-    n = int(input("Cantidad de partes: "))
     # Si la carpeta no existe, se crea
     if(not os.path.isdir('./' + configFile['VIDEO']['Directory'])):
         os.mkdir('./' + configFile['VIDEO']['Directory'])
@@ -103,30 +102,27 @@ def startRecording(url):
             # Se busca el caracter n, donde en la posicion siguiente
             # se tiene el numero del video
             nVideo = int(latestFile.split('\\')[-1].split('_')[0])+1
-            # Se modifica n para que corresponda con la cantidad
-            # de partes que se desea grabar
-            n = n + nVideo - 1
     # Mientras no existan problemas al grabar y queden partes por grabar,
     # se llama a la funcion videoRecorder
     r = True
     runningStatus = sched.getRunningStatus()
     while ( (runningStatus) and (r) ):
-        print ("Recording video Nº "+str(nVideo)+"...")
         r = videoRecorder(nVideo, dt_string, url)
         runningStatus = sched.getRunningStatus()
         nVideo += 1
 
 def recordCameras():
+    sched.startCameraRecording()
     cameraUrls = cfgLoader.getListOfCameras()
     threads = []
     for camera in cameraUrls:
-        thread = threading.Thread(target = startRecording, args = (camera))
+        thread = threading.Thread(target = startRecording, args = (camera,))
         threads.append(thread)
         thread.start()
 
 def main():
 
-    sched.startCameraRecording(recordCameras, configFile['VIDEO']['startTime'], configFile['VIDEO']['endTime'])
+    sched.scheduleCameraRecording(recordCameras, configFile['VIDEO']['startTime'], configFile['VIDEO']['endTime'])
     while 1:
         sched.run_pending()
         time.sleep(1)

@@ -13,12 +13,12 @@ configFile = cfgLoader.getINIConfiguration()
 def videoUploader(saveDirectory, videoData, videoResponse):
     try:
         cloudStorage.upload_blob('my-new-videos-prueba2211-bucket-test', saveDirectory, videoData['filename'])
-    except:
-        print("Error de conexion al subir el video,",videoData['videoNumber'])
-        print("Contacte con el admin F")
-    else:
         print("actualizando data.")
         api.updateVideoStatusReady(videoResponse['id'], videoData['filename'], videoData['videoNumber'], videoData['store'], videoData['shoppingCenter'])
+    except:
+        print("Error de conexion.")
+        print("Contacte con el admin F")
+    else:
         print("Borrando video...")
         fileManager.eraseFileInFolder(videoData['filename'], configFile['VIDEO']['Directory'])
 # Funcion que obtiene una grabacion desde una url, y
@@ -69,10 +69,13 @@ def videoRecorder(nVideo, today, store, shoppingCenter, cameraID, cameraIP):
     out.release()
     #Se crea video en la DB.
     dataVideo = {"filename": filename, "videoNumber" : nVideo, "store": store, "shoppingCenter": shoppingCenter}
-    videoResponse = api.createVideoData(filename, nVideo, store, shoppingCenter)
-    #Se inicia subida de video.
-    t = threading.Thread(target = videoUploader, args = (saveDirectory, dataVideo, videoResponse))
-    t.start()
+    try:
+        videoResponse = api.createVideoData(filename, nVideo, store, shoppingCenter)
+        #Se inicia subida de video.
+        t = threading.Thread(target = videoUploader, args = (saveDirectory, dataVideo, videoResponse))
+        t.start()
+    except:
+        print("Error de conexion. Press F.")
     return True
 
 
@@ -129,5 +132,5 @@ def main():
     while 1:
         sched.run_pending()
         time.sleep(1)
-        
+
 main()

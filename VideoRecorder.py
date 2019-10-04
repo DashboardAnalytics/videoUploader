@@ -1,13 +1,13 @@
 import datetime
 import numpy as np
 import os, glob, time
-import ConfigLoader as cfgLoader
 import cv2
+import threading
+import scheduler as sched
 import APIConsumer as api
 import CloudStorageFunctions as cloudStorage
 import manageFiles as fileManager
-import threading
-import scheduler as sched
+import ConfigLoader as cfgLoader
 configFile = cfgLoader.getINIConfiguration()
 
 def videoUploader(saveDirectory, videoData, videoResponse):
@@ -20,17 +20,15 @@ def videoUploader(saveDirectory, videoData, videoResponse):
         print("actualizando data.")
         api.updateVideoStatusReady(videoResponse['id'], videoData['filename'], videoData['videoNumber'], videoData['store'], videoData['shoppingCenter'])
         print("Borrando video...")
-        fileManager.eraseFileInFolder(videoData['filename'])
+        fileManager.eraseFileInFolder(videoData['filename'], configFile['VIDEO']['Directory'])
 # Funcion que obtiene una grabacion desde una url, y
 # escribe el archivo de salida en formato .avi
 # Entradas: Int con numero de video actual, string con fecha actual e int con cantidad de frames por segundo
 # Salidas: Boolean indicando si el proceso se llevo a cabo correctamente
-def videoRecorder(nVideo, today, url):
+def videoRecorder(nVideo, today, store, shoppingCenter, cameraID, cameraIP):
     #Se crean las variables necesarias para procesar cada video.
     nFrames = int(configFile['VIDEO']['VideoFrameRate'])
     maxLength = int(configFile['VIDEO']['MaxVideoLength'])
-    localShop = configFile['SHOPPING']['Shop']
-    shopping = configFile['SHOPPING']['ShoppingCenter']
     # Se obtiene nuevamente la fecha, solo que ademas con la hora actual
     now = datetime.datetime.now()
     videoDate = now.strftime("%d-%m-%Y")
@@ -38,10 +36,10 @@ def videoRecorder(nVideo, today, url):
     endTime = (now + datetime.timedelta(0, maxLength)).strftime("%H-%M-%S")
     # Se genera el nombre del archivo de salida
     recordDirectory = './' + configFile['VIDEO']['Directory'] + '/'+today+"/"
-    filename = str(nVideo) + '_' + shopping + '_' + localShop + '_' + videoDate + '_' + startTime + '_' + endTime + '.avi'
+    filename = str(nVideo) + '_' + cameraID +'_' + shoppingCenter + '_' + store + '_' + videoDate + '_' + startTime + '_' + endTime + '.avi'
     saveDirectory = recordDirectory + filename
     # Se comienza a capturar el streaming del video
-    cap = cv2.VideoCapture(url)
+    cap = cv2.VideoCapture(cameraIP)
     if not cap:
         print("!!! Failed VideoCapture: invalid parameter!")
         return False
@@ -70,15 +68,15 @@ def videoRecorder(nVideo, today, url):
     cap.release()
     out.release()
     #Se crea video en la DB.
-    dataVideo = {"filename": filename, "videoNumber" : nVideo, "store": localShop, "shoppingCenter": shopping}
-    videoResponse = api.createVideoData(filename, nVideo, localShop, shopping)
+    dataVideo = {"filename": filename, "videoNumber" : nVideo, "store": store, "shoppingCenter": shoppingCenter}
+    videoResponse = api.createVideoData(filename, nVideo, store, shoppingCenter)
     #Se inicia subida de video.
     t = threading.Thread(target = videoUploader, args = (saveDirectory, dataVideo, videoResponse))
     t.start()
     return True
 
 
-def startRecording(url):
+def startRecording(store, shoppingCenter, cameraID, cameraIP):
     # Se obtiene fecha actual para generar la carpeta correspondiente
     today = datetime.datetime.now()
     dt_string = today.strftime("%d-%m-%Y")
@@ -107,18 +105,23 @@ def startRecording(url):
     r = True
     runningStatus = sched.getRunningStatus()
     while ( (runningStatus) and (r) ):
-        r = videoRecorder(nVideo, dt_string, url)
+        r = videoRecorder(nVideo, dt_string, store, shoppingCenter, cameraID, cameraIP)
         runningStatus = sched.getRunningStatus()
         nVideo += 1
 
 def recordCameras():
-    sched.startCameraRecording()
-    cameraUrls = cfgLoader.getListOfCameras()
-    threads = []
-    for camera in cameraUrls:
-        thread = threading.Thread(target = startRecording, args = (camera,))
-        threads.append(thread)
-        thread.start()
+    csvFile = cfgLoader.getCSVFile()
+    if(csvFile['result']):
+        sched.startCameraRecording()
+        cameraData = fileManager.readCameraCSV(csvFile['path'])
+        threads = []
+        for row in cameraData.itertuples():
+            #row[1] = Store. row[2] = shoppingCenter. row[3] = cameraID. row[4] = cameraIP.
+            thread = threading.Thread(target = startRecording, args = (row[1], row[2], row[3], row[4],))
+            threads.append(thread)
+            thread.start()
+    else:
+        print('file not found.')
 
 def main():
 
@@ -126,5 +129,5 @@ def main():
     while 1:
         sched.run_pending()
         time.sleep(1)
-
+        
 main()

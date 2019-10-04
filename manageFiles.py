@@ -1,5 +1,4 @@
 import os
-import ConfigLoader as cfgLoader
 import pandas as pd
 import datetime
 
@@ -26,15 +25,15 @@ def eraseFileInFolder(filename):
     else:
         return False
 
-def checkCameraCSVFile():
-    if(os.path.exists(cfgLoader.getINIConfiguration()['CAMERAS']['CameraCSV'])):
+def checkCameraCSVFile(filepath):
+    if(os.path.exists(filepath)):
         return True
     else:
         return False
 
-def readCameraCSV():
-    if(checkCameraCSVFile()):
-        data = pd.read_csv(cfgLoader.getINIConfiguration()['CAMERAS']['CameraCSV'], sep=';')
+def readCameraCSV(csv_path):
+    if(checkCameraCSVFile(csv_path)):
+        data = pd.read_csv(csv_path, sep=';')
         return data
     else:
         return []

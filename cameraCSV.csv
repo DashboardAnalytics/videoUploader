@@ -1,4 +1,4 @@
 store;shoppingCenter;cameraID;cameraIP
-Paris;FloridaCenter;CCTV1;rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov
-Easy;CostaneraCenter;CCTV1;http://158.170.18.165:8081/video.mjpg
-Easy;CostaneraCenter;CCTV2;rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov
+Paris;FloridaCenter;CCTV1;http://158.170.208.146:8081/video.mjpg
+;;;
+;;;

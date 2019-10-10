@@ -1,6 +1,6 @@
 import datetime
 import numpy as np
-import os, glob, time
+import os, glob, time, io, struct
 import cv2
 import threading
 import scheduler as sched
@@ -50,6 +50,7 @@ def videoRecorder(nVideo, today, store, shoppingCenter, cameraID, cameraIP):
     # Se empieza a grabar el video.
     out = cv2.VideoWriter(saveDirectory,cv2.VideoWriter_fourcc('M','J','P','G'), nFrames, (frame_width,frame_height))
 
+    
     aux2 = 0
     aux = 0
     while aux < (maxLength*nFrames):
@@ -61,12 +62,14 @@ def videoRecorder(nVideo, today, store, shoppingCenter, cameraID, cameraIP):
             return False
         # Se escribe el frame en el archivo de salida
         if(aux2 % nFrames == 0):
-            out.write(frame)
+            print(frame)
+            print(out.write(frame))
             aux += 1
         aux2 += 1
     # Se liberan los recursos de captura y de escritura
     cap.release()
     out.release()
+    """
     #Se crea video en la DB.
     dataVideo = {"filename": filename, "videoNumber" : nVideo, "store": store, "shoppingCenter": shoppingCenter}
     try:
@@ -76,8 +79,8 @@ def videoRecorder(nVideo, today, store, shoppingCenter, cameraID, cameraIP):
         t.start()
     except:
         print("Error de conexion. Press F.")
+    """
     return True
-
 
 def startRecording(store, shoppingCenter, cameraID, cameraIP):
     # Se obtiene fecha actual para generar la carpeta correspondiente
@@ -106,23 +109,24 @@ def startRecording(store, shoppingCenter, cameraID, cameraIP):
     # Mientras no existan problemas al grabar y queden partes por grabar,
     # se llama a la funcion videoRecorder
     r = True
-    runningStatus = sched.getRunningStatus()
-    while ( (runningStatus) and (r) ):
+    #runningStatus = sched.getRunningStatus()
+    while ( nVideo < 3 ):
         r = videoRecorder(nVideo, dt_string, store, shoppingCenter, cameraID, cameraIP)
-        runningStatus = sched.getRunningStatus()
+        #runningStatus = sched.getRunningStatus()
         nVideo += 1
 
 def recordCameras():
     csvFile = cfgLoader.getCSVFile()
     if(csvFile['result']):
-        sched.startCameraRecording()
+        #sched.startCameraRecording()
         cameraData = fileManager.readCameraCSV(csvFile['path'])
         threads = []
         for row in cameraData.itertuples():
-            #row[1] = Store. row[2] = shoppingCenter. row[3] = cameraID. row[4] = cameraIP.
-            thread = threading.Thread(target = startRecording, args = (row[1], row[2], row[3], row[4],))
-            threads.append(thread)
-            thread.start()
+            if(type(row[1]) == str):
+                #row[1] = Store. row[2] = shoppingCenter. row[3] = cameraID. row[4] = cameraIP.
+                thread = threading.Thread(target = startRecording, args = (row[1], row[2], row[3], row[4],))
+                threads.append(thread)
+                thread.start()
     else:
         print('file not found.')
 
@@ -133,4 +137,4 @@ def main():
         sched.run_pending()
         time.sleep(1)
 
-main()
+recordCameras()

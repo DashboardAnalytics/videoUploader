@@ -2,6 +2,8 @@
 
 apt-get update
 
+git pull
+
 apt-get install -y python3
 
 apt-get install -y python3-pip
@@ -20,10 +22,4 @@ pip3 install google-cloud-storage
 
 pip3 install pandas
 
-git clone https://github.com/DashboardAnalytics/videoUploader.git
-
-cd videoUploader
-
-git pull
-
-python3 videoUploader.py
+printf "\n\n***Sistema instalado correctamente!***\n\n"

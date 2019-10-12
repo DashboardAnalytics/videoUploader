@@ -2,9 +2,9 @@
 
 apt-get update
 
-apt-get install python3
+apt-get install -y python3
 
-apt-get install python3-pip
+apt-get install -y python3-pip
 
 apt-get install -y libsm6 libxext6 libxrender-dev
 

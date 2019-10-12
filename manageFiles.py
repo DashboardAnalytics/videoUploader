@@ -1,5 +1,6 @@
 import os
-import ConfigLoader as cfgLoader
+import pandas as pd
+import datetime
 
 def checkFileInFolder(filename, folder):
 
@@ -11,14 +12,28 @@ def checkFileInFolder(filename, folder):
     else:
         return False
 
+
 def eraseFileInFolder(filename):
 
-    today = datetime.now()
+    today = datetime.datetime.now()
     dt_string = today.strftime("%d-%m-%Y")
     directory = './' + cfgLoader.getINIConfiguration()['VIDEO']['Directory'] + '/' + dt_string
 
     if(checkFileInFolder(filename, directory)):
-        os.remove(directoty + '/' + filename)
+        os.remove(directory + '/' + filename)
         return True
     else:
         return False
+
+def checkCameraCSVFile(filepath):
+    if(os.path.exists(filepath)):
+        return True
+    else:
+        return False
+
+def readCameraCSV(csv_path):
+    if(checkCameraCSVFile(csv_path)):
+        data = pd.read_csv(csv_path, sep=';')
+        return data
+    else:
+        return []

@@ -8,6 +8,19 @@ def getINIConfiguration():
 
     return config
 
+def getCSVFile():
+    config = configparser.ConfigParser()
+    config.read('configuration.ini')
+
+    if('CAMERAS' in config):
+        if('CameraCSV' in config['CAMERAS']):
+            csvPath = config['CAMERAS']['CameraCSV']
+            return {'path': csvPath, 'result': True}
+        else:
+            return {'path': "", 'result': False}
+    else:
+        return {'path': "", 'result': False}
+
 #Funcion que obtiene la lista de camaras existentes en el archivo de configuración.
 def getListOfCameras():
 

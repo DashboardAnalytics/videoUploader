@@ -26,7 +26,7 @@ printf "\nDesea configurar gcloud? (Y/N)\n"
 
 read option
 
-if [ $option == "Y"]; then
+if [[ $option = "Y"]] ; then
     apt-get install -y lsb-core
 
     export CLOUD_SDK_REPO="cloud-sdk-$(lsb_release -c -s)"

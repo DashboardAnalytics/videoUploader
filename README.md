@@ -1,11 +1,20 @@
-
-
-
 ## Instalacion
 
+### Clonar Repositorio
+
+git clone https://github.com/DashboardAnalytics/videoUploader.git
+
+cd videoUploader
+
+git pull
+
+### Instalar usando .sh
+
+sudo ./install.sh
+
+### Instalar sin usar .sh
+
 apt-get update
-###  GIT
-apt-get install git-core
 
 ### Python
 apt-get install python3
@@ -27,10 +36,5 @@ pip3 install google-cloud-storage
 pip3 install pandas
 
 ## Ejecutar
-git clone https://github.com/DashboardAnalytics/videoUploader.git
-
-cd videoUploader
-
-git pull
 
 python3 videoUploader.py

@@ -29,12 +29,12 @@ def explicit():
     print(buckets)
     print()
 
-def upload_blob(bucket_name, source_file_name, destination_blob_name):
+def upload_blob(bucket_name, source_file_name, destination_blob_name, destination_folder):
     """Uploads a file to the bucket."""
     storage_client = storage.Client.from_service_account_json(
             'GCSCredentials.json')
     bucket = storage_client.get_bucket(bucket_name)
-    blob = bucket.blob(destination_blob_name)
+    blob = bucket.blob(destination_folder+"/"+destination_blob_name)
 
     blob.upload_from_filename(source_file_name)
     print("\nUploading video...")
@@ -43,8 +43,4 @@ def upload_blob(bucket_name, source_file_name, destination_blob_name):
         destination_blob_name))
     print("Done!\n")
 
-"""explicit()
-create_storage_bucket('my-new-videos-prueba2211-bucket-test')
-explicit()"""
-
-#upload_blob('my-new-videos-prueba2211-bucket-test', 'creating_bucket_example.mov', 'creating_bucket_example.mov')
+#upload_blob('streamed-videos', 'creating_bucket_example.mov', 'creating_bucket_example.mov', 'test-videos')

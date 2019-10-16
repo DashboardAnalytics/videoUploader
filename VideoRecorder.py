@@ -7,16 +7,18 @@ import APIConsumer as api
 import CloudStorageFunctions as cloudStorage
 import manageFiles as fileManager
 import ConfigLoader as cfgLoader
+import Logger as log
 configFile = cfgLoader.getINIConfiguration()
 
 def videoUploader(saveDirectory, videoData, videoResponse):
     try:
-        cloudStorage.upload_blob('my-new-videos-prueba2211-bucket-test', saveDirectory, videoData['filename'])
+        cloudStorage.upload_blob('streamed-videos', saveDirectory, videoData['filename'])
         print("actualizando data.")
         api.updateVideoStatusReady(videoResponse['id'], videoData['filename'], videoData['videoNumber'], videoData['store'], videoData['shoppingCenter'])
     except:
         print("Error de conexion.")
         print("Contacte con el admin F")
+        log.sendEmailCloud(videoData['videoNumber'],videoData['store'],videoData['shoppingCenter'],videoData['cameraIP'],videoData['cameraID'])
     else:
         print("Borrando video...")
         fileManager.eraseFileInFolder(videoData['filename'], configFile['VIDEO']['Directory'])
@@ -38,6 +40,7 @@ def videoRecorder(nVideo, today, store, shoppingCenter, cameraID, cameraIP):
     filename = str(nVideo) + '_' + cameraID +'_' + shoppingCenter + '_' + store + '_' + videoDate + '_' + startTime + '_' + endTime + '.avi'
     saveDirectory = recordDirectory + filename
     # Se comienza a capturar el streaming del video
+
     cap = cv2.VideoCapture(cameraIP)
     if not cap:
         print("!!! Failed VideoCapture: invalid parameter!")
@@ -47,7 +50,7 @@ def videoRecorder(nVideo, today, store, shoppingCenter, cameraID, cameraIP):
     frame_width = int(cap.get(3))
     frame_height = int(cap.get(4))
     # Se empieza a grabar el video.
-    out = cv2.VideoWriter(saveDirectory,cv2.VideoWriter_fourcc('M','J','P','G'), nFrames, (frame_width,frame_height))
+    out = cv2.VideoWriter(saveDirectory, cv2.VideoWriter_fourcc('M', 'J','P','G'), nFrames, (frame_width,frame_height))
 
     aux2 = 0
     aux = 0
@@ -57,6 +60,8 @@ def videoRecorder(nVideo, today, store, shoppingCenter, cameraID, cameraIP):
         # Si se produce un error al leer el frame, se detiene el proceso
         if type(frame) == type(None):
             print("!!! Couldn't read frame!")
+            log.sendEmailCamera(
+                nVideo, store, shoppingCenter, cameraIP, cameraID)
             return False
         # Se escribe el frame en el archivo de salida
         if(aux2 % nFrames == 0):
@@ -67,15 +72,19 @@ def videoRecorder(nVideo, today, store, shoppingCenter, cameraID, cameraIP):
     cap.release()
     out.release()
     #Se crea video en la DB.
-    dataVideo = {"filename": filename, "videoNumber" : nVideo, "store": store, "shoppingCenter": shoppingCenter}
+    dataVideo = {"filename": filename, "videoNumber": nVideo,
+        "store": store, "shoppingCenter": shoppingCenter}
     try:
-        videoResponse = api.createVideoData(filename, nVideo, store, shoppingCenter)
+        videoResponse = api.createVideoData(
+            filename, nVideo, store, shoppingCenter)
         #Se inicia subida de video.
-        t = threading.Thread(target = videoUploader, args = (saveDirectory, dataVideo, videoResponse))
+        t = threading.Thread(target=videoUploader, args = (saveDirectory, dataVideo, videoResponse))
         t.start()
     except:
-        print("Error de conexion. Press F.")
+        log.sendEmailApi(nVideo, store, shoppingCenter, cameraIP, cameraID)
+        return False
     return True
+    
 
 
 def startRecording(store, shoppingCenter, cameraID, cameraIP):

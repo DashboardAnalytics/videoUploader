@@ -21,7 +21,7 @@ def videoUploader(saveDirectory, videoData, videoResponse):
         log.sendEmailCloud(videoData['videoNumber'],videoData['store'],videoData['shoppingCenter'],videoData['cameraIP'],videoData['cameraID'])
     else:
         print("Borrando video...")
-        fileManager.eraseFileInFolder(videoData['filename'], configFile['VIDEO']['Directory'])
+        fileManager.eraseFileInFolder(saveDirectory)
 # Funcion que obtiene una grabacion desde una url, y
 # escribe el archivo de salida en formato .avi
 # Entradas: Int con numero de video actual, string con fecha actual e int con cantidad de frames por segundo
@@ -73,7 +73,8 @@ def videoRecorder(nVideo, today, store, shoppingCenter, cameraID, cameraIP):
     out.release()
     #Se crea video en la DB.
     dataVideo = {"filename": filename, "videoNumber": nVideo,
-        "store": store, "shoppingCenter": shoppingCenter}
+        "store": store, "shoppingCenter": shoppingCenter, "cameraIP": cameraIP,
+        "cameraID": cameraID, "videoDate": videoDate}
     try:
         videoResponse = api.createVideoData(
             filename, nVideo, store, shoppingCenter)
@@ -84,7 +85,7 @@ def videoRecorder(nVideo, today, store, shoppingCenter, cameraID, cameraIP):
         log.sendEmailApi(nVideo, store, shoppingCenter, cameraIP, cameraID)
         return False
     return True
-    
+
 
 
 def startRecording(store, shoppingCenter, cameraID, cameraIP):

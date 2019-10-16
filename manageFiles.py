@@ -2,25 +2,18 @@ import os
 import pandas as pd
 import datetime
 
-def checkFileInFolder(filename, folder):
+def checkFileInFolder(filename):
 
-    if(os.path.exists(folder)):
-        if(os.path.exists(folder + '/' + filename)):
-            return True
-        else:
-            return False
+    if(os.path.exists(filename)):
+        return True
     else:
         return False
 
 
-def eraseFileInFolder(filename):
+def eraseFileInFolder(file):
 
-    today = datetime.datetime.now()
-    dt_string = today.strftime("%d-%m-%Y")
-    directory = './' + cfgLoader.getINIConfiguration()['VIDEO']['Directory'] + '/' + dt_string
-
-    if(checkFileInFolder(filename, directory)):
-        os.remove(directory + '/' + filename)
+    if(checkFileInFolder(file)):
+        os.remove(file)
         return True
     else:
         return False
